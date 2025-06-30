@@ -1,20 +1,20 @@
-﻿#include <iostream>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <iomanip>
-#include <sstream>
-#include <limits>
+﻿#include <iostream> // ввод-вывод
+#include <fstream> // для работы с файлами
+#include <vector>  
+#include <algorithm> // алгоритмы STL (find)
+#include <iomanip> // форматирование вывода (setw)
+#include <sstream> // строковые потоки
+#include <limits>   // для numeric_limits
 #include <locale>  // Для поддержки UTF-8 в Linux
 
-#ifdef _WIN32
+#ifdef _WIN32   // Только для Windows, кодировка
 #define NOMINMAX // Исключаем макросы min и max из windows.h из-за конфликтов с STL
-#include <windows.h> // Только для Windows
+#include <windows.h>  
 #endif
 
-using namespace std;
+using namespace std;  
 
-void initConsoleEncoding() {
+void initConsoleEncoding() { //инициализация кодировки для Win
 #ifdef _WIN32
     SetConsoleOutputCP(1251); // UTF-8 в Windows
     SetConsoleCP(1251);
@@ -22,8 +22,6 @@ void initConsoleEncoding() {
     setlocale(LC_ALL, "en_US.UTF-8"); // UTF-8 в Linux
 #endif
 }
-
-
 
 // Структура для хранения данных о книге
 struct Book {
@@ -38,8 +36,8 @@ struct Book {
 // Класс для управления коллекцией книг
 class Library {
 private:
-    vector<Book> books;
-    const string filename = "library.txt";
+    vector<Book> books; 
+    const string filename = "library.txt"; //Имя файла для сохранения/загрузки
 
 public:
     // Добавление книги
@@ -47,12 +45,12 @@ public:
         books.push_back(book);
     }
 
-    // Удаление (списание) книги по названию
+    // списание книги по названию
     bool removeBook(const string& name) {
-        auto it = find_if(books.begin(), books.end(),
+        auto it = find_if(books.begin(), books.end(), // Ищем книгу по названию
             [&name](const Book& b) { return b.name == name; });
 
-        if (it != books.end()) {
+        if (it != books.end()) { // Если книга найдена
             it->isAvailable = false;  // Помечаем как списанную
             return true;
         }
@@ -61,84 +59,84 @@ public:
 
     // Поиск книг по критериям (название/автор/жанр)
     vector<Book> findBooks(const string& keyword, const string& searchBy = "name") const {
-        vector<Book> result;
-        for (const auto& book : books) {
-            bool match = false;
-            if (searchBy == "name" && book.name.find(keyword) != string::npos) {
+        vector<Book> result; // Вектор для хранения найденных книг
+        for (const auto& book : books) { // Перебираем все книги
+            bool match = false; // Флаг совпадения
+            if (searchBy == "name" && book.name.find(keyword) != string::npos) { // Поиск по названию
                 match = true;
             }
-            else if (searchBy == "author" && book.author.find(keyword) != string::npos) {
+            else if (searchBy == "author" && book.author.find(keyword) != string::npos) { // Поиск по автору
                 match = true;
             }
-            else if (searchBy == "genre" && book.genre.find(keyword) != string::npos) {
+			else if (searchBy == "genre" && book.genre.find(keyword) != string::npos) { //Поиск по жанру
                 match = true;
             }
-            if (match) {
-                result.push_back(book);
+            if (match) { // Если совпадение найдено
+                result.push_back(book); // Добавляем книгу в результат
             }
         }
         return result;
     }
 
     // Сортировка книг по году издания
-    vector<Book> getBooksSortedByYear() const {
-        vector<Book> sortedBooks = books;
-        sort(sortedBooks.begin(), sortedBooks.end(),
+    vector<Book> getBooksSortedByYear() const { 
+        vector<Book> sortedBooks = books; // Копируем книги
+        sort(sortedBooks.begin(), sortedBooks.end(), // Сортируем по году
             [](const Book& a, const Book& b) { return a.year < b.year; });
-        return sortedBooks;
+        return sortedBooks; // Возвращаем отсортированный вектор
     }
 
     // Сохранение данных в файл
     bool saveToFile() const {
-        ofstream outFile(filename);
-        if (!outFile) return false;
+        ofstream outFile(filename); // Открываем файл для записи
+        if (!outFile) return false; // Если не удалось открыть, возвращаем false
 
-        for (const auto& book : books) {
-            outFile << book.name << ","
-                << book.author << ","
-                << book.genre << ","
-                << book.year << ","
-                << book.isAvailable << "\n";
+        for (const auto& book : books) { // Перебираем все книги
+            outFile << book.name << "," // Записываем название
+                << book.author << "," // Записываем автора
+                << book.genre << "," // Записываем жанр
+                << book.year << "," // Записываем год
+                << book.isAvailable << "\n"; // Записываем статус (1/0)
         }
-        outFile.close();
+        outFile.close(); // Закрываем файл
         return true;
     }
 
     // Загрузка данных из файла
     bool loadFromFile() {
-        ifstream inFile(filename);
-        if (!inFile) return false;
+        ifstream inFile(filename); // Открываем файл для чтения
+        if (!inFile) return false; // Если не удалось открыть, возвращаем false
 
-        books.clear();
-        string line;
-        while (getline(inFile, line)) {
-            stringstream ss(line);
-            Book book;
-            getline(ss, book.name, ',');
-            getline(ss, book.author, ',');
-            getline(ss, book.genre, ',');
+        books.clear();  // Очищаем текущий список книг
+        string line; // Строка для чтения из файла
+        while (getline(inFile, line)) { // Читаем файл построчно
+            stringstream ss(line); // Создаём строковый поток
+            Book book; // Создаём объект книги
+            getline(ss, book.name, ','); // Считываем название
+            getline(ss, book.author, ','); // Считываем автора
+            getline(ss, book.genre, ','); // Считываем жанр
 
-            string yearStr, availableStr;
-            getline(ss, yearStr, ',');
-            getline(ss, availableStr);
+            string yearStr, availableStr; // Строки для года и статуса
+            getline(ss, yearStr, ','); // Считываем год
+			getline(ss, availableStr); // Считываем доступна/списана
 
-            book.year = stoi(yearStr);
-            book.isAvailable = (availableStr == "1");
+			book.year = stoi(yearStr); // Преобразуем год в int
+			book.isAvailable = (availableStr == "1"); // Преобразуем статус 1 - доступна 0 - списана
 
-            books.push_back(book);
+			books.push_back(book); // Добавляем книгу в вектор
         }
-        inFile.close();
+		inFile.close(); // Закрываем файл
         return true;
     }
 
     // Печать всех книг (с фильтром по жанру, если указан)
-    void printAllBooks(const string& genreFilter = "") const {
-        if (books.empty()) {
-            cout << "Библиотека пуста.\n";
+    void printAllBooks(const string& genreFilter = "") const { 
+        if (books.empty()) { // Если коллекция пуста
+            cout << "Библиотека пуста.\n"; 
             return;
         }
 
-        cout << "\nСписок книг:\n";
+        cout << "\nСписок книг:\n"; // вывод заголовка
         cout << "--------------------------------------------------------------------------\n";
         cout << setw(20) << left << "Название"
             << setw(20) << "Автор"
@@ -147,8 +145,8 @@ public:
             << "Статус\n";
         cout << "--------------------------------------------------------------------------\n";
 
-        for (const auto& book : books) {
-            if (genreFilter.empty() || book.genre == genreFilter) {
+        for (const auto& book : books) { // Перебираем все книги
+            if (genreFilter.empty() || book.genre == genreFilter) { // Фильтр по жанру
                 cout << setw(20) << left << book.name
                     << setw(20) << book.author
                     << setw(15) << book.genre
@@ -160,13 +158,12 @@ public:
 };
 
 // Функция для ввода данных о книге с клавиатуры
-// Функция для ввода данных о книге с клавиатуры
 Book inputBook() {
-    Book book;
+    Book book; // Создаём объект книги
     while (true) {
         cout << "Введите название книги: ";
         getline(cin, book.name);
-        if (book.name.empty()) {
+		if (book.name.empty()) { // Проверяем, что название не пустое
             cout << "Название не может быть пустым. ";
         } else {break;}
     }
@@ -174,7 +171,7 @@ Book inputBook() {
     while (true) {
         cout << "Введите автора: ";
         getline(cin, book.author);
-        if (book.author.empty()) {
+		if (book.author.empty()) {  // Проверяем, что автор не пустой
             cout << "Автор не может быть пустым. ";
         } else {break;}
     }
@@ -182,7 +179,7 @@ Book inputBook() {
     while (true) {
         cout << "Введите жанр: ";
         getline(cin, book.genre);
-        if (book.genre.empty()) {
+		if (book.genre.empty()) { // Проверяем, что жанр не пустой
             cout << "Жанр не может быть пустым. ";
         } else {break;}
     }
@@ -190,13 +187,13 @@ Book inputBook() {
     // Проверка корректности ввода года
     while (true) {
         cout << "Введите год издания: ";
-        cin >> book.year;
-        if (book.genre.empty() || book.year <= 0) {
+		cin >> book.year; 
+		if (book.genre.empty() || book.year <= 0) { // Проверяем, что год положительный и не путой
             cout << "Ошибка: введите корректный числовой год.\n";
         } else {break;}
     }
 
-    book.isAvailable = true;
+    book.isAvailable = true; // Книга по умолчанию доступна
     return book;
 }
 
@@ -213,33 +210,33 @@ void displayMenu() {
         << "Выберите действие: ";
 }
 
-int main() {
-    initConsoleEncoding();
+int main() { 
+    initConsoleEncoding(); // Инициализация кодировки консоли
 
-    Library lib;
-    int choice;
+    Library lib; // Создаём объект библиотеки
+    int choice; // Переменная для выбора пользователя
 
 
-    if (lib.loadFromFile()) {
+    if (lib.loadFromFile()) { // Пытаемся загрузить данные из файла
         cout << "Данные успешно загружены из файла.\n";
     }
     else {
         cout << "Файл не найден. Начните с пустой библиотеки.\n";
     }
 
-    do {
-        displayMenu();
-        cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    do { // Основной цикл программы
+        displayMenu(); // Показываем меню
+        cin >> choice; // Считываем выбор пользователя
+		cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Очищаем буфер ввода
 
-        switch (choice) {
-        case 1: {
-            Book book = inputBook();
-            lib.addBook(book);
+        switch (choice) { // Обработка выбора пользователя
+        case 1: { // Добавить книгу
+            Book book = inputBook(); // Вводим данные о книге
+            lib.addBook(book); // Добавляем книгу в библиотеку
             cout << "Книга добавлена.\n";
             break;
         }
-        case 2: {
+        case 2: { // Списать книгу
             string name;
             cout << "Введите название книги для списания: ";
             getline(cin, name);
@@ -251,34 +248,34 @@ int main() {
             }
             break;
         }
-        case 3: {
-            string keyword, searchBy;
+		case 3: { // Найти книгу
+            string keyword, searchBy; // Переменные для поиска
             cout << "Введите ключевое слово для поиска: ";
             getline(cin, keyword);
             cout << "Искать по (name/author/genre): ";
             getline(cin, searchBy);
 
-            vector<Book> found = lib.findBooks(keyword, searchBy);
+            vector<Book> found = lib.findBooks(keyword, searchBy); // Ищем книги
             if (found.empty()) {
                 cout << "Книги не найдены.\n";
             }
             else {
                 cout << "\nНайдено " << found.size() << " книг:\n";
-                for (const auto& book : found) {
+                for (const auto& book : found) { // Перебираем найденные книги
                     cout << book.name << " | " << book.author << " | " << book.genre
                         << " | " << book.year << " | " << (book.isAvailable ? "Доступна" : "Списана"); "\n";
                 }
             }
             break;
         }
-        case 4: {
-            string genreFilter;
+        case 4: { // Показать все книги (с фильтром по жанру)
+            string genreFilter; // Переменная для фильтра
             cout << "Введите жанр для фильтра (или оставьте пустым): ";
             getline(cin, genreFilter);
             lib.printAllBooks(genreFilter);
             break;
         }
-        case 5: {
+        case 5: { // Сохранить данные
             if (lib.saveToFile()) {
                 cout << "Данные сохранены в файл.\n";
             }
@@ -286,8 +283,8 @@ int main() {
                 cout << "Ошибка при сохранении.\n";
             }
             break;
-        }
-        case 6: {
+        } 
+        case 6: { // Загрузить данные
             if (lib.loadFromFile()) {
                 cout << "Данные загружены.\n";
             }
@@ -296,7 +293,7 @@ int main() {
             }
             break;
         }
-        case 0: {
+		case 0: { // Выход из программы
             cout << "Выход из программы.\n";
             break;
         }
@@ -304,7 +301,7 @@ int main() {
             cout << "Неверный выбор. Попробуйте снова.\n";
         }
         }
-    } while (choice != 0);
+    } while (choice != 0); // Повторяем, пока не выбран выход
 
     return 0;
 }
