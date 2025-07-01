@@ -155,6 +155,50 @@ public:
             }
         }
     }
+
+    // Редактирование книги по названию
+    bool editBook(const string& name) {
+        auto it = find_if(books.begin(), books.end(), // Ищем книгу по названию
+            [&name](const Book& b) { return b.name == name; });
+
+        if (it != books.end()) { // Если книга найдена
+            cout << "Редактирование книги:\n";
+			cout << "Текущее название: " << it->name << "\n"; // указатель на текущую книгу
+            cout << "Введите новое название (или оставьте пустым для сохранения текущего): ";
+            string newName;
+            getline(cin, newName);
+			if (!newName.empty()) { // Если введено новое название
+                it->name = newName; 
+            }
+
+            cout << "Текущий автор: " << it->author << "\n";
+            cout << "Введите нового автора (или оставьте пустым для сохранения текущего): ";
+            string newAuthor;
+            getline(cin, newAuthor);
+            if (!newAuthor.empty()) {
+                it->author = newAuthor;
+            }
+
+            cout << "Текущий жанр: " << it->genre << "\n";
+            cout << "Введите новый жанр (или оставьте пустым для сохранения текущего): ";
+            string newGenre;
+            getline(cin, newGenre);
+            if (!newGenre.empty()) {
+                it->genre = newGenre;
+            }
+
+            cout << "Текущий год издания: " << it->year << "\n";
+            cout << "Введите новый год издания (или оставьте пустым для сохранения текущего): ";
+            string newYearStr;
+            getline(cin, newYearStr);
+            if (!newYearStr.empty()) {
+				it->year = stoi(newYearStr); // Преобразуем строку в int
+            }
+
+            return true;
+        }
+        return false;
+    }
 };
 
 // Функция для ввода данных о книге с клавиатуры
@@ -206,6 +250,7 @@ void displayMenu() {
         << "4. Показать все книги (с фильтром по жанру)\n"
         << "5. Сохранить данные\n"
         << "6. Загрузить данные\n"
+        << "7. Редактировать книгу\n"
         << "0. Выход\n"
         << "Выберите действие: ";
 }
@@ -290,6 +335,17 @@ int main() {
             }
             else {
                 cout << "Ошибка при загрузке.\n";
+            }
+            break;
+        }
+        case 7: { // Редактировать книгу
+            string name;
+            cout << "Введите название книги для редактирования: ";
+            getline(cin, name);
+            if (lib.editBook(name)) {
+                cout << "Книга успешно отредактирована.\n";
+            } else {
+                cout << "Книга не найдена.\n";
             }
             break;
         }
